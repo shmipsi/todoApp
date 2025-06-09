@@ -1,0 +1,27 @@
+body {
+  background-color: #f0f0f0;
+  font-family: Arial, sans-serif;
+  color: #333;
+  padding: 0px;
+  margin: 1%;
+}
+
+header,
+footer {
+  text-align: center;
+}
+
+main {
+  margin: 2%;
+  display: flex;
+  flex-direction: row;
+}
+
+.side-nav {
+  width: fit-content;
+}
+
+.todo-container {
+  margin-left: 5%;
+  margin-right: auto;
+}
