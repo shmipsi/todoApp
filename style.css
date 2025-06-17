@@ -21,7 +21,15 @@ main {
   width: fit-content;
 }
 
+.folder, .todo-item {
+  margin-top: 5%;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
 .todo-container {
   margin-left: 5%;
   margin-right: auto;
+  width: fit-content;
 }
