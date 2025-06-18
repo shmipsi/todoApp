@@ -24,7 +24,7 @@ function loadData () {
 
     const activeFolderFromStorage = localStorage.getItem("activeFolder");
     if (activeFolderFromStorage) {
-        activeFolder = JSON.parse(activeFolderFromStorage);
+        activeFolder = activeFolderFromStorage;
     } else {
         activeFolder = null;
     }
@@ -54,6 +54,7 @@ function renderFolders () {
         folderTitle.textContent = folderName;
         folderTitle.onclick = () => {
             activeFolder = folderTitle.textContent;
+            saveData();
             renderToDos();
         }
         folderItem.appendChild(folderTitle);
@@ -79,6 +80,8 @@ function addFolder () {
         return;
     }
     folders[folderName] = {};
+    activeFolder = folderName; // Set newly created folder as active
+    document.getElementById("folder-input").value = ""; // Clear input field
 
     saveData();
     renderFolders();
@@ -86,9 +89,13 @@ function addFolder () {
 
 function deleteFolder (folderName) {
     if(confirm(`Are you sure you want to delete the folder "${folderName}"?`)) {
+        if (activeFolder === folderName) {
+            activeFolder = ""; // Reset active folder if deleted
+        }
         delete folders[folderName];
         saveData();
         renderFolders();
+        renderToDos();
     }
 }
 
@@ -96,12 +103,17 @@ function renderToDos () {
     const todoList = document.getElementById("todo-list");
     todoList.innerHTML = ""; // Clear existing tasks
 
+    if (!activeFolder || !folders[activeFolder]) {
+        todoList.innerHTML = "<p>Create or select a folder</p>";
+        return;
+    }
+
     if (Object.keys(folders[activeFolder]).length === 0) {
         todoList.innerHTML = "<p>No tasks available. Please add a task.</p>";
         return;
     }
 
-    const tasks = folders[activeFolder.textContent];
+    const tasks = folders[activeFolder];
     for (const taskName in tasks) {
         const taskItem = document.createElement("div");
         taskItem.className = "todo-item";
@@ -121,12 +133,17 @@ function renderToDos () {
 
         const editButton = document.createElement("button");
         editButton.textContent = "Edit";
-        editButton.onclick = () => editToDo(taskName.textContent);
+        editButton.onclick = () => editToDo(taskName);
         taskItem.appendChild(editButton);
+
+        const archiveButton = document.createElement("button");
+        archiveButton.textContent = "Archive";
+        archiveButton.onclick = () => archiveToDO(taskName);
+        taskItem.appendChild(archiveButton);
 
         const deleteButton = document.createElement("button");
         deleteButton.textContent = "Delete";
-        deleteButton.onclick = () => deleteToDo(taskName.textContent);
+        deleteButton.onclick = () => deleteToDo(taskName);
         taskItem.appendChild(deleteButton);
 
         todoList.appendChild(taskItem);
@@ -139,31 +156,41 @@ function addToDo () {
         alert("Please enter a task name.");
         return;
     }
-    if (folders[activeFolder.textContent][taskName]) {
+    if (folders[activeFolder][taskName]) {
         alert("Task already exists in this folder.");
         return;
     }
-    folders[activeFolder.textContent][taskName] = false; // Default to not done
+    folders[activeFolder][taskName] = false; // Default to not done
 
     saveData();
     renderToDos();
-
 }
 
 function deleteToDo (taskName) {
-    if (!taskName || !folders[activeFolder.textContent][taskName]) {
-        alert("Task not found.");
-        return;
-    }
-    delete folders[activeFolder.textContent][taskName];
+    delete folders[activeFolder][taskName];
     saveData();
     renderToDos();
 }
 
-function editToDo () {
-
+function editToDo (taskName) {
+    const newTask = prompt("Edit task:", taskName);
+    if (newTask && newTask.trim() !== "" && !folders[activeFolder][newTask]) {
+        folders[activeFolder][newTask] = folders[activeFolder][taskName];
+        delete folders[activeFolder][taskName];
+        saveData();
+        renderToDos();
+    } else {
+        alert("Invalid task name or task already exists.");
+    }
 }
 
-function toggleToDo () {
-
+function archiveToDO (taskName) {
+    if (!folders["Archive"]) {
+        folders["Archive"] = {};
+    }
+    folders["Archive"][taskName] = folders[activeFolder][taskName];
+    delete folders[activeFolder][taskName];
+    saveData();
+    renderFolders();
+    renderToDos();
 }
