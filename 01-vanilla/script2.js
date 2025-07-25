@@ -1,3 +1,7 @@
+// ToDO
+// - Maybe not give an alert if no folder selected but user tries to add a task
+// but instead add a standart folder
+
 let activeFolder = "";
 let folders = {
     //Example folder structure
